@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "1.0",
+  "workerId": "org.valcorza.swin-classification-finetuner",
+  "role": "finetuner",
+  "capabilities": {
+    "taskProfiles": ["core.task.vision.image-classification"],
+    "datasetRepresentations": ["core.dataset.vision.image-folder"],
+    "modelFamilies": ["org.timm.swinv2"],
+    "trainingMethods": ["core.training.supervised-finetuning"],
+    "artifactRoles": ["core.artifact.model"],
+    "resumeModes": ["NONE"],
+    "extensionsSupported": [],
+    "configDomains": {"baseModel": {"type": "string", "enum": ["swinv2-tiny-window8-256-ms-in1k", "swinv2-small-window8-256-ms-in1k"]}},
+    "requiresOutboundDuringRunning": false,
+    "requiresCustomCode": false
+  }
+}
