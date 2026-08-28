@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASSED",
+  "finetunerRevision": "7806d3fe60e4062c85daeaafe50ac27869d0f994",
+  "validatorRevision": "cb3e08bd04c7dab005b785950d62470703b52a43",
+  "contractRevision": "0f0c221222402721ee7716edf01378604cbd6ef3",
+  "runtime": {
+    "baseImage": "pytorch/pytorch@sha256:417bd75df6365104c283ea4c1651fb3530d9eb5a4c2fafa51943cff2a94e6385",
+    "qualificationImageDigest": "sha256:ff4297dd81798d91c8616dc96fcb61de5cbdeca102afb964562fd52c62b43d47",
+    "timmVersion": "1.0.28",
+    "torchVersion": "2.8.0+cu128",
+    "cudaVersion": "12.8",
+    "device": "NVIDIA GeForce RTX 5070 Ti Laptop GPU",
+    "computeCapability": "12.0",
+    "driverVersion": "610.88",
+    "networkMode": "none",
+    "sourceMountsReadOnly": true
+  },
+  "training": {
+    "modelKey": "swinv2-tiny-window8-256-ms-in1k",
+    "epochs": 1,
+    "batchSize": 2,
+    "trainSamples": 4,
+    "validationSamples": 2,
+    "testSamples": 2,
+    "resultState": "SUCCEEDED",
+    "freshPersistedReload": "PASSED",
+    "validationAccuracy": 1.0,
+    "validationCrossEntropy": 0.12637260556221008
+  },
+  "outputs": {
+    "workerReleaseDigest": "sha256:263183929d26eb4b2b365ba4f8fc3585719d958ab2465d8f91b8290fc6492010",
+    "artifactBundleDigest": "sha256:007196aea7ef49b980393419e026e7d26cdc446d309655c4d09ca7f9b15c915d",
+    "artifactManifestDigest": "sha256:efef2cbdae6941c6f528b84c48b5d21536e25bddf1749d4f097bcf13f5696859",
+    "evaluationReportDigest": "sha256:c397819d593353f3cb02dd8a384f6dabb5eeb0434f303eb6cb0f7dcaaaa909a7",
+    "runManifestDigest": "sha256:97ed017cf2edda9a8440940ce53e70a6e80741abdbd5b1fa27ed5c470de841f3"
+  },
+  "verification": {
+    "contractSchemaCount": 7,
+    "contractSchemaResult": "PASSED",
+    "evidenceFileCount": 39,
+    "evidenceDigest": "sha256:0d80a567b3e8a21be62f2de39c0d05bb62aca03486b7f9c6f8c2e9c7c7762c0c",
+    "evidenceDigestConstruction": "SHA-256 of UTF-8 sorted lines '<relative-path>  <file-sha256>\\n' over the smoke root plus runner, fixture generator, verifier, and commit-pinned contract schema archive"
+  },
+  "limitations": [
+    "This is a bounded Tiny end-to-end fixture smoke, not a production-scale convergence or throughput benchmark.",
+    "Tiny and Small runtime qualification and VRAM envelopes remain recorded separately in blackwell-timm-1.0.28.json."
+  ]
+}

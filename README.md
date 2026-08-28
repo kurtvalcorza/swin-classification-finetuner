@@ -4,6 +4,8 @@ NATIVE `ml-worker` SwinV2 image-classification finetuner with a validator-bound 
 
 The exact torch 2.8/cu128 + published timm 1.0.28 + Blackwell execution packet passed at immutable revision `87459d6ced8da748279f2688f839e5b0d92fc05c`. Both catalog entries are runtime-qualified against the recorded batch-8 envelopes. The training command consumes the frozen validator handoff without resplitting, trains on `cuda:0`, publishes a content-addressed safetensors bundle atomically, reloads that persisted bundle into a fresh model, evaluates the frozen validation split, and writes contract-shaped terminal manifests.
 
+The bounded end-to-end Tiny training smoke for implementation revision `7806d3fe60e4062c85daeaafe50ac27869d0f994` passed with runtime networking disabled and read-only source mounts. Its environment, output digests, exact contract-schema result, and limitations are recorded in `qualification/blackwell-training-7806d3f.json`.
+
 Implemented now:
 
 - immutable consumption of the validator's `ValidatedDatasetManifest`, `DataPlan`, `SemanticDatasetSchema`, and `LogicalDatasetManifest`;

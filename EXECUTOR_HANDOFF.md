@@ -9,8 +9,17 @@ batch-1/batch-8 VRAM envelopes, and packet digest are recorded in
 base image, torch/timm dependency, loading path, model revision, or target GPU
 changes; the recorded pass is not transferable to a different runtime graph.
 
+The real training path at immutable revision
+`7806d3fe60e4062c85daeaafe50ac27869d0f994` also passed a bounded Tiny
+end-to-end smoke with the validator and finetuner sources mounted read-only,
+runtime networking disabled, atomic artifact publication, fresh persisted
+reload, and all seven emitted contract documents validated against
+`ml-worker@0f0c221222402721ee7716edf01378604cbd6ef3`. The evidence envelope is
+recorded in `qualification/blackwell-training-7806d3f.json`; it is not a
+production-scale convergence or throughput claim.
+
 ## Mission
-Qualify published `timm==1.0.28` and the catalogued SwinV2 Tiny/Small bases on the exact NATIVE runtime target before the Builder enables training.
+Requalify published `timm==1.0.28`, the catalogued SwinV2 Tiny/Small bases, and the real training path whenever the declared runtime graph changes.
 
 ## Required environment
 
