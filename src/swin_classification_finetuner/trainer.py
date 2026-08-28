@@ -29,6 +29,16 @@ TRAINING_METHOD = "core.training.supervised-finetuning"
 TRAINER_ALGORITHM = "org.valcorza.swin-classification-finetuner.v1"
 NORMALIZATION_MEAN = (0.485, 0.456, 0.406)
 NORMALIZATION_STD = (0.229, 0.224, 0.225)
+EXIF_ORIENTATION = "transpose-to-visual-orientation"
+
+
+def load_visual_image(path: Path):
+    """Decode with the validator's declared EXIF semantic: visual orientation."""
+    from PIL import Image, ImageOps
+
+    with Image.open(path) as image:
+        image.load()
+        return ImageOps.exif_transpose(image).convert("RGB")
 
 
 @dataclass(frozen=True)
@@ -90,6 +100,7 @@ class TrainingConfig:
             **asdict(self),
             "input": {"height": 256, "width": 256},
             "transforms": {
+                "exifOrientation": EXIF_ORIENTATION,
                 "train": [
                     {"id": "org.torchvision.resize", "size": [256, 256]},
                     {"id": "org.torchvision.to-tensor"},
@@ -509,7 +520,6 @@ def train_dataset(
     import timm
     import torch
     import torch.nn.functional as functional
-    from PIL import Image
     from safetensors.torch import load_file, save_file
     from torch.utils.data import DataLoader, Dataset
     from torchvision import transforms
@@ -607,8 +617,7 @@ def train_dataset(
 
         def __getitem__(self, index: int):
             item = self.items[index]
-            with Image.open(item.path) as image:
-                tensor = transform(image.convert("RGB"))
+            tensor = transform(load_visual_image(item.path))
             return tensor, item.target, item.sample_id
 
     train_records = tuple(record for record in records if record.split == "train")
@@ -856,13 +865,33 @@ def persist_terminal_failure(
     execution_plan_path = output / "execution-plan.json"
     if not execution_plan_path.is_file():
         return None
-    execution_plan = json.loads(execution_plan_path.read_text(encoding="utf-8"))
+    try:
+        execution_plan = json.loads(execution_plan_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    if (
+        not isinstance(execution_plan, dict)
+        or execution_plan.get("jobId") != binding.job_id
+        or execution_plan.get("attemptId") != binding.attempt_id
+    ):
+        # A plan left behind by a previous attempt must not receive this
+        # attempt's failure record.
+        return None
     execution_plan_digest = djson(execution_plan)
 
     phase_state_path = output / "phase-state.json"
     phases: dict[str, str] = {}
     if phase_state_path.is_file():
-        phases = json.loads(phase_state_path.read_text(encoding="utf-8"))
+        try:
+            loaded = json.loads(phase_state_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            loaded = None
+        if isinstance(loaded, dict):
+            phases = {
+                phase: state
+                for phase, state in loaded.items()
+                if isinstance(phase, str) and isinstance(state, str)
+            }
         for phase, state in tuple(phases.items()):
             if state == "RUNNING":
                 phases[phase] = "FAILED"
