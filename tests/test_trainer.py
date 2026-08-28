@@ -11,6 +11,7 @@ from swin_classification_finetuner.trainer import (
     ArtifactMemberSource,
     TrainingBinding,
     TrainingConfig,
+    load_visual_image,
     persist_terminal_failure,
     publish_artifact_bundle,
     resolve_sample_records,
@@ -155,6 +156,77 @@ def test_terminal_artifact_failure_preserves_phase_truth(tmp_path: Path) -> None
     )
     assert run_manifest["observed"]["phases"]["computation"] == "SUCCEEDED"
     assert run_manifest["observed"]["phases"]["publication"] == "FAILED"
+
+
+def test_visual_decode_applies_exif_orientation(tmp_path: Path) -> None:
+    from PIL import Image
+
+    image = Image.new("RGB", (2, 1))
+    image.putpixel((0, 0), (255, 0, 0))
+    image.putpixel((1, 0), (0, 0, 255))
+    exif = Image.Exif()
+    exif[0x0112] = 3  # 180-degree rotation
+    path = tmp_path / "rotated.png"
+    image.save(path, exif=exif)
+
+    decoded = load_visual_image(path)
+
+    assert decoded.mode == "RGB"
+    assert decoded.getpixel((0, 0)) == (0, 0, 255)
+    assert decoded.getpixel((1, 0)) == (255, 0, 0)
+
+
+def test_terminal_failure_refuses_foreign_execution_plan(tmp_path: Path) -> None:
+    binding = TrainingBinding(
+        "job-2",
+        "attempt-2",
+        "sha256:" + "1" * 64,
+        "sha256:" + "2" * 64,
+        "sha256:" + "3" * 64,
+        "sha256:" + "4" * 64,
+    )
+    (tmp_path / "execution-plan.json").write_text(
+        '{"schemaVersion":"1.0","jobId":"job-1","attemptId":"attempt-1"}',
+        encoding="utf-8",
+    )
+
+    result = persist_terminal_failure(
+        tmp_path, binding, ArtifactPublicationError("disk full")
+    )
+
+    assert result is None
+    assert not (tmp_path / "run-manifest.json").exists()
+    assert not (tmp_path / "result.json").exists()
+
+
+def test_terminal_failure_survives_corrupt_state_files(tmp_path: Path) -> None:
+    binding = TrainingBinding(
+        "job-1",
+        "attempt-1",
+        "sha256:" + "1" * 64,
+        "sha256:" + "2" * 64,
+        "sha256:" + "3" * 64,
+        "sha256:" + "4" * 64,
+    )
+    (tmp_path / "execution-plan.json").write_text("{not json", encoding="utf-8")
+    assert (
+        persist_terminal_failure(tmp_path, binding, RuntimeError("boom")) is None
+    )
+
+    (tmp_path / "execution-plan.json").write_text(
+        '{"schemaVersion":"1.0","jobId":"job-1","attemptId":"attempt-1"}',
+        encoding="utf-8",
+    )
+    (tmp_path / "phase-state.json").write_text("[broken", encoding="utf-8")
+
+    result = persist_terminal_failure(tmp_path, binding, RuntimeError("boom"))
+
+    assert result is not None
+    assert result["state"] == "FAILED"
+    run_manifest = json.loads(
+        (tmp_path / "run-manifest.json").read_text(encoding="utf-8")
+    )
+    assert run_manifest["observed"]["phases"] == {}
 
 
 def test_artifact_verification_rejects_member_path_traversal(tmp_path: Path) -> None:
