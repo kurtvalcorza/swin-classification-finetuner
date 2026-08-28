@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "1.0",
+  "sourceRevision": "87459d6ced8da748279f2688f839e5b0d92fc05c",
+  "packetManifestDigest": "sha256:230e094ee7fa4eb2e9cab7a74f0a45ce31c35bdeb9df68f83ac87e912059e522",
+  "executorSequenceExit": 0,
+  "baseImageDigest": "sha256:417bd75df6365104c283ea4c1651fb3530d9eb5a4c2fafa51943cff2a94e6385",
+  "qualificationImageDigest": "sha256:ff4297dd81798d91c8616dc96fcb61de5cbdeca102afb964562fd52c62b43d47",
+  "dependency": {"name": "timm", "version": "1.0.28"},
+  "environment": {
+    "os": "Linux",
+    "architecture": "x86_64",
+    "wslKernel": "6.18.33.2-microsoft-standard-WSL2",
+    "python": "3.11.13",
+    "torch": "2.8.0+cu128",
+    "cuda": "12.8",
+    "cudnn": 91002,
+    "device": "NVIDIA GeForce RTX 5070 Ti Laptop GPU",
+    "driver": "610.88",
+    "computeCapability": "12.0",
+    "runtimeNetwork": "none"
+  },
+  "models": {
+    "swinv2-tiny-window8-256-ms-in1k": {
+      "weightDigest": "sha256:c47f52b4556ff4436aa9502f5efbc93aac77fdab42d9d70dd845931757ff5d65",
+      "batch1": {"peakAllocatedMiB": 364.40625, "peakReservedMiB": 414},
+      "batch8": {"peakAllocatedMiB": 1533.421875, "peakReservedMiB": 1724}
+    },
+    "swinv2-small-window8-256-ms-in1k": {
+      "weightDigest": "sha256:7e793c2f3576d20b5f746ac5dc6b7271745d612f9ce06ccabe382c36f39f1caa",
+      "batch1": {"peakAllocatedMiB": 561.595703125, "peakReservedMiB": 648},
+      "batch8": {"peakAllocatedMiB": 2458.82421875, "peakReservedMiB": 2732}
+    }
+  },
+  "limitations": [
+    "One optimizer step per model and batch size; not a full-training stability claim.",
+    "Batch 8 is a bounded representative probe, not a maximum-capacity claim."
+  ]
+}

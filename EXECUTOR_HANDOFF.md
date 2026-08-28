@@ -1,5 +1,14 @@
 # Executor handoff — SwinV2 classification runtime qualification
 
+## Completed baseline
+
+The published `timm==1.0.28` packet passed on finetuner revision
+`87459d6ced8da748279f2688f839e5b0d92fc05c`. Its environment, weight digests,
+batch-1/batch-8 VRAM envelopes, and packet digest are recorded in
+`qualification/blackwell-timm-1.0.28.json`. Rerun this procedure whenever the
+base image, torch/timm dependency, loading path, model revision, or target GPU
+changes; the recorded pass is not transferable to a different runtime graph.
+
 ## Mission
 Qualify published `timm==1.0.28` and the catalogued SwinV2 Tiny/Small bases on the exact NATIVE runtime target before the Builder enables training.
 

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0",
-  "catalogVersion": "0.1",
+  "catalogVersion": "0.2",
   "entries": {
     "swinv2-tiny-window8-256-ms-in1k": {
       "modelDescriptorId": "org.timm.swinv2-tiny-window8-256-ms-in1k",
@@ -15,7 +15,7 @@
       },
       "license": {"spdx": "MIT", "datasetTerms": "ImageNet-1k dataset terms apply to the pretrained weights."},
       "input": {"height": 256, "width": 256},
-      "qualification": {"status": "BLOCKED", "reason": "Awaiting published timm 1.0.28 + torch 2.8/cu128 Blackwell execution packet and measured VRAM envelope.", "measuredEnvelope": null}
+      "qualification": {"status": "QUALIFIED", "reason": "Published timm 1.0.28 + torch 2.8/cu128 Blackwell packet passed at batch 8.", "measuredEnvelope": {"baseImageDigest": "sha256:417bd75df6365104c283ea4c1651fb3530d9eb5a4c2fafa51943cff2a94e6385", "torchVersion": "2.8.0+cu128", "cudaVersion": "12.8", "device": "NVIDIA GeForce RTX 5070 Ti Laptop GPU", "peakVramMiB": 1724, "height": 256, "width": 256, "evidenceDigest": "sha256:230e094ee7fa4eb2e9cab7a74f0a45ce31c35bdeb9df68f83ac87e912059e522"}}
     },
     "swinv2-small-window8-256-ms-in1k": {
       "modelDescriptorId": "org.timm.swinv2-small-window8-256-ms-in1k",
@@ -30,7 +30,7 @@
       },
       "license": {"spdx": "MIT", "datasetTerms": "ImageNet-1k dataset terms apply to the pretrained weights."},
       "input": {"height": 256, "width": 256},
-      "qualification": {"status": "BLOCKED", "reason": "Awaiting published timm 1.0.28 + torch 2.8/cu128 Blackwell execution packet and measured VRAM envelope.", "measuredEnvelope": null}
+      "qualification": {"status": "QUALIFIED", "reason": "Published timm 1.0.28 + torch 2.8/cu128 Blackwell packet passed at batch 8.", "measuredEnvelope": {"baseImageDigest": "sha256:417bd75df6365104c283ea4c1651fb3530d9eb5a4c2fafa51943cff2a94e6385", "torchVersion": "2.8.0+cu128", "cudaVersion": "12.8", "device": "NVIDIA GeForce RTX 5070 Ti Laptop GPU", "peakVramMiB": 2732, "height": 256, "width": 256, "evidenceDigest": "sha256:230e094ee7fa4eb2e9cab7a74f0a45ce31c35bdeb9df68f83ac87e912059e522"}}
     }
   }
 }

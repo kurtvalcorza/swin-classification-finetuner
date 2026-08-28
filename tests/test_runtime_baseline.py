@@ -20,16 +20,27 @@ def test_published_timm_runtime_baseline_is_consistent() -> None:
     assert "1.0.29" not in "\n".join([*dependencies, handoff, readme])
 
 
-def test_catalog_stays_blocked_until_exact_packet_passes() -> None:
+def test_catalog_matches_published_qualification_evidence() -> None:
     catalog = json.loads(
         (ROOT / "catalog" / "base-model-catalog.json").read_text(encoding="utf-8")
     )
+    evidence = json.loads(
+        (ROOT / "qualification" / "blackwell-timm-1.0.28.json").read_text(
+            encoding="utf-8"
+        )
+    )
 
-    for entry in catalog["entries"].values():
+    assert evidence["dependency"] == {"name": "timm", "version": "1.0.28"}
+    assert evidence["executorSequenceExit"] == 0
+    for key, entry in catalog["entries"].items():
         qualification = entry["qualification"]
-        assert qualification["status"] == "BLOCKED"
-        assert qualification["measuredEnvelope"] is None
+        envelope = qualification["measuredEnvelope"]
+        assert qualification["status"] == "QUALIFIED"
         assert "timm 1.0.28" in qualification["reason"]
+        assert envelope["evidenceDigest"] == evidence["packetManifestDigest"]
+        assert envelope["peakVramMiB"] == evidence["models"][key]["batch8"][
+            "peakReservedMiB"
+        ]
 
 
 def test_repository_text_is_lf_pinned() -> None:
