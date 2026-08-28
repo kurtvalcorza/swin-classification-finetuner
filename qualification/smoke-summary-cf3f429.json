@@ -1,5 +1,5 @@
 {
- "artifactGeneration": "4ce94182f85b2acdb5dc3893bca04de58540d4c895e6aaeafb4878536dc96cfe",
+ "artifactGeneration": "967381b25a81ee0166792224b6ab3b81d00b1f8a61c2337ce8019dc3946cfbc1",
  "contractValidation": {
   "trainer": [
    {
@@ -85,6 +85,11 @@
  },
  "fixtureSampleCount": 8,
  "networkIsolated": true,
+ "sourceTreeDigests": {
+  "finetuner": "sha256:1a7bbb9cf75e03190a79e2994511f485b836afd850163fabf7ac56f6593b601c",
+  "schemas": "sha256:9cd976c350fc8a4e2c63c6078ab9687c641e96125fa4545678724ac2a9496be1",
+  "validator": "sha256:d23105d0521d56d78c6107308c9d277dd4593ea1cba8655d130cb09a572e99e3"
+ },
  "stages": [
   {
    "exit": 0,
@@ -107,9 +112,9 @@
    "stage": "trainer",
    "stderrTail": [],
    "summary": {
-    "artifactGeneration": "4ce94182f85b2acdb5dc3893bca04de58540d4c895e6aaeafb4878536dc96cfe",
-    "artifactManifestDigest": "sha256:36a74e1fe2ab04d44d8e9f39f74c3538a49b58cdc3e5278500c8a26ab433ba81",
-    "evaluationReportDigest": "sha256:49cb1971008318ea4730d10c96ec87fa47ac60fe3d2b5ce9b17d20c3599c50af",
+    "artifactGeneration": "967381b25a81ee0166792224b6ab3b81d00b1f8a61c2337ce8019dc3946cfbc1",
+    "artifactManifestDigest": "sha256:bc99778a4ab37609c2a35bf047c54968541fde13103d49da8b6cf203f8d20570",
+    "evaluationReportDigest": "sha256:c9996b86b51449a88d555bed979efb06a67308df15dd40d8d9fa1ae3bd94c544",
     "metrics": [
      {
       "id": "core.metric.classification.accuracy",
@@ -118,11 +123,11 @@
      },
      {
       "id": "org.valcorza.metric.classification.cross-entropy",
-      "value": 0.4943520426750183,
+      "value": 0.4943520724773407,
       "version": "1"
      }
     ],
-    "runManifestDigest": "sha256:89f672a4b33308101781ad01b4eed903fe6566eb519cd5c8ec732644d3f9fb39",
+    "runManifestDigest": "sha256:23931c77b2683763171936cf171791aa3b250acd8a7b51ee8ab43f2a41cc925c",
     "state": "SUCCEEDED"
    }
   }

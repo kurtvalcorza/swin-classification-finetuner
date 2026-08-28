@@ -19,16 +19,26 @@ the image at `/opt/qualification/weights`.
 ROOT=/root/swin-smoke-<revision>
 mkdir -p $ROOT/sources/validator $ROOT/sources/finetuner $ROOT/sources/schemas $ROOT/work $ROOT/harness
 # extract the three archives into $ROOT/sources/... and copy this directory to $ROOT/harness
+# compute the expected source-tree digests from INDEPENDENT fresh extractions of
+# the same pinned git archives, then write them as JSON:
+#   {"validator": "sha256:...", "finetuner": "sha256:...", "schemas": "sha256:..."}
+# to $ROOT/expected-sources.json using source_digest.py
 docker run --rm --gpus all --network none \
   -v $ROOT:/smoke --entrypoint python \
   swin-classification-qualification:87459d6-timm-1.0.28 \
-  /smoke/harness/run_smoke.py --sources /smoke/sources --work /smoke/work
+  /smoke/harness/run_smoke.py --sources /smoke/sources --work /smoke/work \
+  --expected-sources /smoke/expected-sources.json
 ```
 
 Exit 0 plus `"state": "PASSED"` in `<work>/smoke-summary.json` is the pass signal.
-The runner refuses (exit 3) if the network is reachable. The fixture contains one
-EXIF orientation-6 JPEG so the trainer's transpose-to-visual-orientation decode
-path is exercised on GPU.
+The runner refuses (exit 3) if the network is reachable, and refuses (exit 4)
+if any source tree's canonical digest (`source_digest.py`) differs from the
+expected value — a PASS is therefore bound to the pinned source identities,
+which the summary records under `sourceTreeDigests`. To audit a recorded packet,
+rerun `git archive <revision>` for each input, extract, compute
+`source_digest.py`, and compare with the digests in the evidence JSON. The
+fixture contains one EXIF orientation-6 JPEG so the trainer's
+transpose-to-visual-orientation decode path is exercised on GPU.
 
 ## Evidence digest
 

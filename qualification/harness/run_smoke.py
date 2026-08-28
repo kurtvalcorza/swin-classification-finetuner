@@ -105,6 +105,13 @@ def main() -> int:
     arguments = argparse.ArgumentParser()
     arguments.add_argument("--sources", type=Path, required=True)
     arguments.add_argument("--work", type=Path, required=True)
+    arguments.add_argument(
+        "--expected-sources",
+        type=Path,
+        required=True,
+        help="JSON mapping {validator,finetuner,schemas} to the canonical "
+        "tree digest of the pinned git archive; the run refuses on mismatch",
+    )
     options = arguments.parse_args()
     sources, work = options.sources, options.work
     work.mkdir(parents=True, exist_ok=True)
@@ -120,6 +127,29 @@ def main() -> int:
 
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     from generate_fixture import generate
+    from source_digest import tree_digest
+
+    expected = json.loads(options.expected_sources.read_text(encoding="utf-8"))
+    source_tree_digests = {
+        name: tree_digest(sources / name)
+        for name in ("validator", "finetuner", "schemas")
+    }
+    mismatched = {
+        name: {"expected": expected.get(name), "observed": observed}
+        for name, observed in source_tree_digests.items()
+        if expected.get(name) != observed
+    }
+    if mismatched:
+        print(
+            json.dumps(
+                {
+                    "state": "REFUSED",
+                    "reason": "source trees do not match the pinned revisions",
+                    "mismatched": mismatched,
+                }
+            )
+        )
+        return 4
 
     fixture = work / "fixture"
     sample_count = generate(fixture)
@@ -180,6 +210,7 @@ def main() -> int:
     summary = {
         "state": "PASSED" if passed else "FAILED",
         "networkIsolated": network_isolated,
+        "sourceTreeDigests": source_tree_digests,
         "fixtureSampleCount": sample_count,
         "environment": {
             "python": sys.version.split()[0],
