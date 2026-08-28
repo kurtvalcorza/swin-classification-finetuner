@@ -1,0 +1,13 @@
+[build-system]
+requires=["setuptools>=75","wheel"]
+build-backend="setuptools.build_meta"
+[project]
+name="swin-classification-finetuner"
+version="0.1.0"
+description="NATIVE ml-worker SwinV2 image-classification finetuner preflight"
+requires-python=">=3.11"
+[tool.setuptools.packages.find]
+where=["src"]
+[tool.pytest.ini_options]
+pythonpath=["src"]
+testpaths=["tests"]
