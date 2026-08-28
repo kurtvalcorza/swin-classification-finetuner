@@ -48,6 +48,6 @@ def test_handoff_label_map_is_fail_closed(tmp_path):
         for n,v in [('data-plan.json',dp),('semantic-dataset-schema.json',ss),('logical-dataset-manifest.json',lm),('validated-dataset-manifest.json',vm)]: write(tmp_path/n,v)
         return load_validated_handoff(tmp_path)
     assert attempt({'0':'cat','1':'dog'}).class_names==['cat','dog']
-    for bad in ({},{'0':'cat','2':'dog'},{'x':'cat'},{'0':'cat','1':'cat'},{'0':''},{'0':None}):
+    for bad in ({},{'0':'cat','2':'dog'},{'x':'cat'},{'0':'cat','1':'cat'},{'0':''},{'0':None},{'0':['cat']},{'0':{'name':'cat'}},{'0':'cat','1':['dog']}):
         with pytest.raises(TypedRefusal) as e: attempt(bad)
         assert e.value.code=='HANDOFF_LABEL_MAP_INVALID'
