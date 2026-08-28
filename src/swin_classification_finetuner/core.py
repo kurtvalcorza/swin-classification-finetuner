@@ -40,6 +40,12 @@ def load_validated_handoff(root:Path)->ValidatedHandoff:
     assigned=[a['sampleId'] for a in dp.get('assignments',[])]
     if len(sample_ids)!=len(set(sample_ids)) or len(assigned)!=len(set(assigned)): raise TypedRefusal('HANDOFF_DUPLICATE_SAMPLE_ID','Handoff contains duplicate sample IDs.')
     if set(sample_ids)!=set(assigned): raise TypedRefusal('HANDOFF_SAMPLE_SET_MUTATION','DataPlan must assign exactly the validated logical sample set; filtering/re-splitting is forbidden.',{'logicalCount':len(sample_ids),'assignmentCount':len(assigned)})
+    label_map=ss.get('labelMap')
+    if not isinstance(label_map,dict) or not label_map: raise TypedRefusal('HANDOFF_LABEL_MAP_INVALID','SemanticDatasetSchema labelMap must be a non-empty object.',{'observed':type(label_map).__name__})
+    keys=set(label_map)
+    if keys!={str(i) for i in range(len(label_map))}: raise TypedRefusal('HANDOFF_LABEL_MAP_INVALID','labelMap keys must be exactly the decimal strings 0..N-1.',{'observed':sorted(keys)})
+    names=list(label_map.values())
+    if len(names)!=len(set(names)) or any(not isinstance(n,str) or not n for n in names): raise TypedRefusal('HANDOFF_LABEL_MAP_INVALID','labelMap class names must be unique non-empty strings.',{'observed':names})
     return ValidatedHandoff(root,vm,dp,ss,lm)
 
 def load_catalog(path:Path)->dict[str,Any]: return load_json(path)
