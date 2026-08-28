@@ -331,24 +331,64 @@ def _bundle_identity(manifest: dict[str, Any]) -> str:
 def _member_name(member: dict[str, Any]) -> str:
     for relationship in member.get("relationships", []):
         if relationship.get("type") == "org.valcorza.bundle.member-path":
-            return relationship["path"]
-    raise RuntimeError(f"Artifact member has no persisted path: {member['role']}")
+            value = relationship.get("path")
+            relative = PurePosixPath(value) if isinstance(value, str) else None
+            if (
+                relative is None
+                or relative.is_absolute()
+                or len(relative.parts) != 1
+                or relative.parts[0] in {"", ".", ".."}
+            ):
+                raise ArtifactVerificationError(
+                    "artifact member path must be one contained filename"
+                )
+            return relative.parts[0]
+    raise ArtifactVerificationError(
+        f"artifact member has no persisted path: {member.get('role', '<unknown>')}"
+    )
 
 
 def verify_artifact_bundle(
     generation: Path, expected_manifest: dict[str, Any] | None = None
 ) -> dict[str, Any]:
+    if generation.is_symlink() or not generation.is_dir():
+        raise ArtifactVerificationError(
+            "persisted artifact generation is missing or symlinked"
+        )
     manifest_path = generation / "artifact-manifest.json"
     if manifest_path.is_symlink() or not manifest_path.is_file():
         raise ArtifactVerificationError(
             "persisted artifact manifest is missing or symlinked"
         )
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        raise ArtifactVerificationError(
+            "persisted artifact manifest is unreadable or invalid JSON"
+        ) from error
+    if (
+        not isinstance(manifest, dict)
+        or manifest.get("schemaVersion") != "1.0"
+        or not isinstance(manifest.get("members"), list)
+    ):
+        raise ArtifactVerificationError(
+            "persisted artifact manifest has an invalid structure"
+        )
     if expected_manifest is not None and manifest != expected_manifest:
         raise ArtifactVerificationError(
             "persisted artifact manifest differs from committed manifest"
         )
     for member in manifest["members"]:
+        if (
+            not isinstance(member, dict)
+            or not isinstance(member.get("role"), str)
+            or not isinstance(member.get("digest"), str)
+            or not isinstance(member.get("required"), bool)
+            or not isinstance(member.get("relationships"), list)
+        ):
+            raise ArtifactVerificationError(
+                "persisted artifact member has an invalid structure"
+            )
         member_path = generation / _member_name(member)
         if member_path.is_symlink() or not member_path.is_file():
             raise ArtifactVerificationError(
@@ -369,8 +409,14 @@ def publish_artifact_bundle(
     artifact_root: Path, members: tuple[ArtifactMemberSource, ...]
 ) -> tuple[dict[str, Any], Path]:
     artifact_root = Path(artifact_root)
+    if artifact_root.is_symlink():
+        raise ArtifactPublicationError("artifact root must not be a symbolic link")
     generations = artifact_root / "generations"
     generations.mkdir(parents=True, exist_ok=True)
+    if generations.is_symlink() or not generations.is_dir():
+        raise ArtifactPublicationError(
+            "artifact generations root must be a non-symlink directory"
+        )
     stage = artifact_root / f".staging-{uuid.uuid4().hex}"
     stage.mkdir()
     try:

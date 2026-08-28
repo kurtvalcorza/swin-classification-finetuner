@@ -155,3 +155,29 @@ def test_terminal_artifact_failure_preserves_phase_truth(tmp_path: Path) -> None
     )
     assert run_manifest["observed"]["phases"]["computation"] == "SUCCEEDED"
     assert run_manifest["observed"]["phases"]["publication"] == "FAILED"
+
+
+def test_artifact_verification_rejects_member_path_traversal(tmp_path: Path) -> None:
+    generation = tmp_path / "generation"
+    generation.mkdir()
+    manifest = {
+        "schemaVersion": "1.0",
+        "bundleDigest": "sha256:" + "0" * 64,
+        "members": [
+            {
+                "role": "core.artifact.model.weights",
+                "digest": "sha256:" + "1" * 64,
+                "mediaType": "application/vnd.safetensors",
+                "required": True,
+                "relationships": [
+                    {"type": "org.valcorza.bundle.member-path", "path": "../escape"}
+                ],
+            }
+        ],
+    }
+    (generation / "artifact-manifest.json").write_text(
+        json.dumps(manifest), encoding="utf-8"
+    )
+
+    with pytest.raises(RuntimeError, match="contained filename"):
+        verify_artifact_bundle(generation)
