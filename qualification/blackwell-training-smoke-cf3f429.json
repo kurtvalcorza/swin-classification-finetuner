@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "1.0",
+  "status": "PASSED",
+  "finetunerRevision": "cf3f4291a7b32d728cd6c3a9f8bbedf220a45f03",
+  "validatorRevision": "818d88a4a829bc810a4f054a61e32b627035646c",
+  "contractRevision": "0f0c221222402721ee7716edf01378604cbd6ef3",
+  "harness": "qualification/harness (committed; reproduces this packet, see its README.md)",
+  "runtime": {
+    "baseImage": "pytorch/pytorch@sha256:417bd75df6365104c283ea4c1651fb3530d9eb5a4c2fafa51943cff2a94e6385",
+    "qualificationImageDigest": "sha256:ff4297dd81798d91c8616dc96fcb61de5cbdeca102afb964562fd52c62b43d47",
+    "timmVersion": "1.0.28",
+    "torchVersion": "2.8.0+cu128",
+    "cudaVersion": "12.8",
+    "python": "3.11.13",
+    "device": "NVIDIA GeForce RTX 5070 Ti Laptop GPU",
+    "computeCapability": "12.0",
+    "driverVersion": "610.88",
+    "networkMode": "none",
+    "networkIsolationProbe": "huggingface.co DNS resolution failed inside the container, verified by the runner before any stage"
+  },
+  "training": {
+    "modelKey": "swinv2-tiny-window8-256-ms-in1k",
+    "epochs": 1,
+    "batchSize": 2,
+    "trainSamples": 4,
+    "validationSamples": 2,
+    "testSamples": 2,
+    "fixtureIncludesExifOrientedJpeg": true,
+    "resultState": "SUCCEEDED",
+    "freshPersistedReload": "PASSED",
+    "validationAccuracy": 1.0,
+    "validationCrossEntropy": 0.4943520426750183
+  },
+  "outputs": {
+    "artifactBundleDigest": "sha256:4ce94182f85b2acdb5dc3893bca04de58540d4c895e6aaeafb4878536dc96cfe",
+    "artifactManifestDigest": "sha256:36a74e1fe2ab04d44d8e9f39f74c3538a49b58cdc3e5278500c8a26ab433ba81",
+    "evaluationReportDigest": "sha256:49cb1971008318ea4730d10c96ec87fa47ac60fe3d2b5ce9b17d20c3599c50af",
+    "runManifestDigest": "sha256:89f672a4b33308101781ad01b4eed903fe6566eb519cd5c8ec732644d3f9fb39",
+    "validatedDatasetManifestDigest": "sha256:4d0e4751ecf14c2540f0ae3efc05c4423c3ae7d13b65e8bf4a6dfce666763f4c"
+  },
+  "verification": {
+    "contractSchemaCount": 14,
+    "contractSchemaResult": "PASSED",
+    "contractSchemaBreakdown": "7 trainer documents + 7 validator documents, each against its ml-worker schema at the pinned contract revision",
+    "evidenceFileCount": 119,
+    "evidenceDigest": "sha256:2856dc145024bfc936b30ad00bb80433f646b77cb1062a266833ce94f3320cb4",
+    "evidenceDigestConstruction": "SHA-256 of UTF-8 sorted lines '<relative-path>  <file-sha256>\\n' over the smoke root (pinned source archives + committed harness + all run outputs)",
+    "smokeSummary": "qualification/smoke-summary-cf3f429.json"
+  },
+  "limitations": [
+    "Bounded Tiny end-to-end fixture smoke, not a production-scale convergence or throughput benchmark.",
+    "Runtime qualification and VRAM envelopes remain recorded in blackwell-timm-1.0.28.json; this packet did not remeasure them.",
+    "Binding digests (worker release, job spec, admission, grant) are synthetic smoke values derived in the harness, not platform-issued records."
+  ]
+}

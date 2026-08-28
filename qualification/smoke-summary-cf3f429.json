@@ -1,0 +1,131 @@
+{
+ "artifactGeneration": "4ce94182f85b2acdb5dc3893bca04de58540d4c895e6aaeafb4878536dc96cfe",
+ "contractValidation": {
+  "trainer": [
+   {
+    "document": "execution-plan.json",
+    "result": "PASS",
+    "schema": "execution-plan.schema.json"
+   },
+   {
+    "document": "resolved-base-model-manifest.json",
+    "result": "PASS",
+    "schema": "resolved-base-model-manifest.schema.json"
+   },
+   {
+    "document": "evaluation-plan.json",
+    "result": "PASS",
+    "schema": "evaluation-plan.schema.json"
+   },
+   {
+    "document": "evaluation-report.json",
+    "result": "PASS",
+    "schema": "evaluation-report.schema.json"
+   },
+   {
+    "document": "artifact-manifest.json",
+    "result": "PASS",
+    "schema": "artifact-manifest.schema.json"
+   },
+   {
+    "document": "run-manifest.json",
+    "result": "PASS",
+    "schema": "run-manifest.schema.json"
+   },
+   {
+    "document": "result.json",
+    "result": "PASS",
+    "schema": "result.schema.json"
+   }
+  ],
+  "validator": [
+   {
+    "document": "execution-plan.json",
+    "result": "PASS",
+    "schema": "execution-plan.schema.json"
+   },
+   {
+    "document": "data-plan.json",
+    "result": "PASS",
+    "schema": "data-plan.schema.json"
+   },
+   {
+    "document": "logical-dataset-manifest.json",
+    "result": "PASS",
+    "schema": "logical-dataset-manifest.schema.json"
+   },
+   {
+    "document": "semantic-dataset-schema.json",
+    "result": "PASS",
+    "schema": "semantic-dataset-schema.schema.json"
+   },
+   {
+    "document": "validated-dataset-manifest.json",
+    "result": "PASS",
+    "schema": "validated-dataset-manifest.schema.json"
+   },
+   {
+    "document": "run-manifest.json",
+    "result": "PASS",
+    "schema": "run-manifest.schema.json"
+   },
+   {
+    "document": "result.json",
+    "result": "PASS",
+    "schema": "result.schema.json"
+   }
+  ]
+ },
+ "environment": {
+  "computeCapability": "12.0",
+  "cuda": "12.8",
+  "device": "NVIDIA GeForce RTX 5070 Ti Laptop GPU",
+  "python": "3.11.13",
+  "torch": "2.8.0+cu128"
+ },
+ "fixtureSampleCount": 8,
+ "networkIsolated": true,
+ "stages": [
+  {
+   "exit": 0,
+   "stage": "validator",
+   "stderrTail": [
+    "<frozen runpy>:128: RuntimeWarning: 'swin_classification_validator.validator' found in sys.modules after import of package 'swin_classification_validator', but prior to execution of 'swin_classification_validator.validator'; this may result in unpredictable behaviour"
+   ],
+   "summary": {
+    "dataPlanDigest": "sha256:46bb7a5a26b490c5d485862c21bdf9bf915265a77d8b34ca06d55c4cb34d415d",
+    "logicalDatasetDigest": "sha256:035641d76932e0fb451c02d825f9a76d0b181b44a49b35d28bc9e3c2618085aa",
+    "runManifestDigest": "sha256:c915b8582036fbd24d69b9d6c424599f33e4d2b538a43c34e074204760113e9f",
+    "semanticDatasetSchemaDigest": "sha256:05e133418e5d7756357236c96ed3b4adba0cc14e7fc03a81d07c7a502caa7dd7",
+    "state": "SUCCEEDED",
+    "validatedDatasetIdentityDigest": "sha256:2bbd3e8fca1deed663e5f1642b868440d5135258b4617d2b27c342d52e95b56a",
+    "validatedDatasetManifestDigest": "sha256:4d0e4751ecf14c2540f0ae3efc05c4423c3ae7d13b65e8bf4a6dfce666763f4c"
+   }
+  },
+  {
+   "exit": 0,
+   "stage": "trainer",
+   "stderrTail": [],
+   "summary": {
+    "artifactGeneration": "4ce94182f85b2acdb5dc3893bca04de58540d4c895e6aaeafb4878536dc96cfe",
+    "artifactManifestDigest": "sha256:36a74e1fe2ab04d44d8e9f39f74c3538a49b58cdc3e5278500c8a26ab433ba81",
+    "evaluationReportDigest": "sha256:49cb1971008318ea4730d10c96ec87fa47ac60fe3d2b5ce9b17d20c3599c50af",
+    "metrics": [
+     {
+      "id": "core.metric.classification.accuracy",
+      "value": 1.0,
+      "version": "1"
+     },
+     {
+      "id": "org.valcorza.metric.classification.cross-entropy",
+      "value": 0.4943520426750183,
+      "version": "1"
+     }
+    ],
+    "runManifestDigest": "sha256:89f672a4b33308101781ad01b4eed903fe6566eb519cd5c8ec732644d3f9fb39",
+    "state": "SUCCEEDED"
+   }
+  }
+ ],
+ "state": "PASSED"
+}
