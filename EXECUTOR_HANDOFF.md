@@ -1,7 +1,7 @@
 # Executor handoff — SwinV2 classification runtime qualification
 
 ## Mission
-Qualify `timm==1.0.29` and the catalogued SwinV2 Tiny/Small bases on the exact NATIVE runtime target before the Builder enables training.
+Qualify published `timm==1.0.28` and the catalogued SwinV2 Tiny/Small bases on the exact NATIVE runtime target before the Builder enables training.
 
 ## Required environment
 
@@ -13,7 +13,7 @@ Qualify `timm==1.0.29` and the catalogued SwinV2 Tiny/Small bases on the exact N
 ## Procedure
 
 1. Resolve this finetuner branch at an immutable commit.
-2. Install/import `timm==1.0.29` against torch 2.8/cu128 and record dependency resolution.
+2. Install/import `timm==1.0.28` against torch 2.8/cu128 and record dependency resolution.
 3. Stage each catalog `model.safetensors` from its exact HF revision; independently SHA-256 verify it against the catalog.
 4. Prove runtime operates with network/HF Hub access disabled.
 5. Instantiate each model locally, run a minimal forward/backward training step at 256x256, and record exit status.

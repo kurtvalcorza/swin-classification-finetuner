@@ -2,7 +2,7 @@
 
 NATIVE `ml-worker` SwinV2 image-classification finetuner, currently at the **preflight/catalog Builder stage**.
 
-This branch deliberately does not claim training readiness yet. The exact torch 2.8/cu128 + timm 1.0.29 + Blackwell execution packet required by the governing spec has not been executed in this environment.
+This branch deliberately does not claim training readiness yet. The exact torch 2.8/cu128 + published timm 1.0.28 + Blackwell execution packet required by the governing spec has not been executed on this branch.
 
 Implemented now:
 
