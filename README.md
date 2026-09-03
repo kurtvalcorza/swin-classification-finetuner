@@ -26,3 +26,15 @@ Implemented now:
 The canonical catalog entry schema is `catalog/base-model-catalog.schema.json`; segmentation must reuse this file byte-identically and can verify it with `catalog/SCHEMA_SHA256`.
 
 Run `swin-classification-train --help` for the worker-facing arguments. Runtime model weights must be staged under `<weights-root>/<model-key>/` exactly as declared by the catalog; Hub access is neither needed nor permitted during training.
+
+## Servable artifact: `model_manifest.json`
+
+Every published bundle now carries a third member, `model_manifest.json`
+(role `org.valcorza.timm.model-manifest`), derived from `model-config.json` in the
+schema of [dimer-inference-service-timm](https://github.com/kurtvalcorza/dimer-inference-service-timm):
+timm identifier, `num_classes`, ordered `class_names`, checkpoint filename, EMA choice,
+and the exact evaluation preprocessing (256×256 plain resize expressed as
+`crop_pct: 1.0, crop_mode: "squash"`, bicubic, ImageNet normalization). A DIMER
+model version made from a bundle is therefore servable by that worker as uploaded,
+with no hand-written manifest. The contract is vendored under `tests/fixtures/` and
+the emitted document is validated against it in the test suite.
