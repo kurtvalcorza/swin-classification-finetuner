@@ -30,6 +30,9 @@ TRAINER_ALGORITHM = "org.valcorza.swin-classification-finetuner.v1"
 NORMALIZATION_MEAN = (0.485, 0.456, 0.406)
 NORMALIZATION_STD = (0.229, 0.224, 0.225)
 EXIF_ORIENTATION = "transpose-to-visual-orientation"
+EVAL_INTERPOLATION = "bicubic"  # torchvision InterpolationMode value; single source for transform + manifest
+MODEL_MANIFEST_FILENAME = "model_manifest.json"
+MODEL_MANIFEST_ROLE = "org.valcorza.timm.model-manifest"
 
 
 def load_visual_image(path: Path):
@@ -132,6 +135,47 @@ class SampleRecord:
     class_name: str
     target: int
     content_digest: str
+
+
+def build_model_manifest(
+    model_config: dict[str, Any], *, checkpoint: str = "model.safetensors"
+) -> dict[str, Any]:
+    """Derive ``model_manifest.json`` (dimer-inference-service-timm contract) from
+    ``model-config.json``.
+
+    Same facts, the worker's schema, so a DIMER model version made from this bundle
+    is servable as uploaded. The evaluation transform is a plain resize to the
+    training resolution, which the worker expresses as ``crop_pct: 1.0`` with
+    ``crop_mode: "squash"``; interpolation and normalization come from the same
+    constants the transform is built from.
+    """
+    validation = model_config["transforms"]["validation"]
+    resize = next(t for t in validation if t["id"] == "org.torchvision.resize")
+    normalize = next(t for t in validation if t["id"] == "org.torchvision.normalize")
+    height, width = resize["size"]
+    class_names = list(model_config["classNames"])
+    num_classes = int(model_config["numClasses"])
+    if len(class_names) != num_classes:
+        raise ValueError(
+            f"classNames has {len(class_names)} entries but numClasses is {num_classes}"
+        )
+    return {
+        "schema_version": 1,
+        "framework": "timm",
+        "model": model_config["timmModelName"],
+        "num_classes": num_classes,
+        "class_names": class_names,
+        "checkpoint": checkpoint,
+        "use_ema": False,
+        "preprocessing": {
+            "input_size": [3, int(height), int(width)],
+            "mean": [float(v) for v in normalize["mean"]],
+            "std": [float(v) for v in normalize["std"]],
+            "interpolation": EVAL_INTERPOLATION,
+            "crop_pct": 1.0,
+            "crop_mode": "squash",
+        },
+    }
 
 
 @dataclass(frozen=True)
@@ -601,7 +645,7 @@ def train_dataset(
     transform = transforms.Compose(
         [
             transforms.Resize(
-                (256, 256), interpolation=InterpolationMode.BICUBIC, antialias=True
+                (256, 256), interpolation=InterpolationMode(EVAL_INTERPOLATION), antialias=True
             ),
             transforms.ToTensor(),
             transforms.Normalize(NORMALIZATION_MEAN, NORMALIZATION_STD),
@@ -716,6 +760,11 @@ def train_dataset(
         save_file(state, weights_path)
         model_config_path = source / "model-config.json"
         _atomic_json(model_config_path, model_config)
+        model_manifest_path = source / MODEL_MANIFEST_FILENAME
+        _atomic_json(
+            model_manifest_path,
+            build_model_manifest(model_config, checkpoint=weights_path.name),
+        )
         try:
             artifact_manifest, generation = publish_artifact_bundle(
                 output / "artifact",
@@ -728,6 +777,11 @@ def train_dataset(
                     ArtifactMemberSource(
                         "org.valcorza.swin-classification.model-config",
                         model_config_path,
+                        "application/json",
+                    ),
+                    ArtifactMemberSource(
+                        MODEL_MANIFEST_ROLE,
+                        model_manifest_path,
                         "application/json",
                     ),
                 ),

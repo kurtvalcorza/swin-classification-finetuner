@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/kurtvalcorza/dimer-inference-service-timm/model_manifest.schema.json",
+  "title": "DIMER timm model artifact manifest",
+  "description": "Ships as `model_manifest.json` inside a DIMER ModelVersion, next to the weights. It is the authoritative description of a fine-tuned timm classifier: architecture identifier, classifier width, ordered class names, which checkpoint file and which weights within it to load, and the exact inference preprocessing. The worker (dimer-inference-service-timm) is a deterministic loader driven by this file; it does not infer training decisions from the checkpoint. Cross-field invariant enforced by the worker and not expressible here: len(class_names) == num_classes == model logits width.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["framework", "model", "num_classes", "class_names", "checkpoint", "preprocessing"],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1,
+      "description": "Manifest schema version. Optional in v1; reserved for future migrations."
+    },
+    "framework": {
+      "type": "string",
+      "const": "timm",
+      "description": "Only timm artifacts are accepted by this worker."
+    },
+    "model": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)?$",
+      "description": "A local timm registry identifier: `architecture` or `architecture.tag` (e.g. `resnet50`, `resnet50.a1_in1k`). Tags are allowed and useful: timm resolves them into pretrained_cfg even with pretrained=False. Remote and path-like sources (`hf-hub:`, `local-dir:`, `/`, `\\`, `@`) are rejected by the pattern and again by the worker.",
+      "examples": ["resnet50", "resnet50.a1_in1k", "vit_small_patch16_224.augreg_in21k_ft_in1k"]
+    },
+    "num_classes": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Width of the classifier head in the checkpoint. Required: timm constructs the model before loading weights with strict=True, so the head width cannot be inferred. 0 (backbone-only) is refused in v1."
+    },
+    "class_names": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1,
+      "description": "Ordered label strings, index-aligned with the classifier outputs. Must have exactly num_classes entries. A property of the trained artifact — never supplied per request."
+    },
+    "checkpoint": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[^/\\\\]+\\.(safetensors|pth\\.tar|pth|bin)$",
+      "description": "Bare filename of the weights file in the same directory. `.safetensors` preferred. Loaded with strict=True and torch weights_only=True; pickled-object checkpoints will fail.",
+      "examples": ["model.safetensors", "checkpoint-best.pth.tar"]
+    },
+    "use_ema": {
+      "type": "boolean",
+      "default": false,
+      "description": "When true and the checkpoint contains `state_dict_ema` or `model_ema`, load those. When false, load `state_dict`/`model`/raw weights even if EMA weights are present. Explicit because timm's own loader silently prefers EMA by default. The worker records which key it actually used in the output provenance."
+    },
+    "preprocessing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input_size", "mean", "std"],
+      "description": "The effective inference transform used during fine-tuning. Persisted because resolve_data_config() reconstructs architecture DEFAULTS from pretrained_cfg, not what training actually used; a mismatch degrades predictions silently rather than failing.",
+      "properties": {
+        "input_size": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 1 },
+          "minItems": 3,
+          "maxItems": 3,
+          "description": "[channels, height, width]. channels must be 3 in v1: the worker converts every input to RGB, so grayscale/multispectral checkpoints are refused at manifest validation rather than failing per image.",
+          "examples": [[3, 224, 224]]
+        },
+        "mean": {
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 1,
+          "description": "Per-channel normalization mean; length must equal input_size[0].",
+          "examples": [[0.485, 0.456, 0.406]]
+        },
+        "std": {
+          "type": "array",
+          "items": { "type": "number", "exclusiveMinimum": 0 },
+          "minItems": 1,
+          "description": "Per-channel normalization std; length must equal input_size[0].",
+          "examples": [[0.229, 0.224, 0.225]]
+        },
+        "interpolation": {
+          "type": "string",
+          "enum": ["bilinear", "bicubic", "nearest"],
+          "default": "bicubic"
+        },
+        "crop_pct": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "description": "Center-crop fraction applied after resize (timm eval convention). When omitted, the worker resolves it from the model's own pretrained_cfg via timm.data.resolve_data_config (the architecture/tag value, e.g. 0.95 for resnet50.a1_in1k) and records crop_pct_source=model_cfg in the output provenance. It does NOT fall through to timm's library-wide 0.875 default. State it explicitly whenever fine-tuning used a different value."
+        },
+        "crop_mode": {
+          "type": "string",
+          "enum": ["center", "squash", "border"],
+          "description": "timm eval crop mode. Defaults to center when omitted."
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "schema_version": 1,
+      "framework": "timm",
+      "model": "resnet50.a1_in1k",
+      "num_classes": 3,
+      "class_names": ["healthy", "blight", "rust"],
+      "checkpoint": "model.safetensors",
+      "use_ema": false,
+      "preprocessing": {
+        "input_size": [3, 224, 224],
+        "mean": [0.485, 0.456, 0.406],
+        "std": [0.229, 0.224, 0.225],
+        "interpolation": "bicubic",
+        "crop_pct": 0.95,
+        "crop_mode": "center"
+      }
+    }
+  ]
+}
