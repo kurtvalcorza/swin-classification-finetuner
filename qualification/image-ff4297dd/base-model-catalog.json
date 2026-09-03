@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "1.0",
+  "catalogVersion": "0.1",
+  "entries": {
+    "swinv2-tiny-window8-256-ms-in1k": {
+      "modelDescriptorId": "org.timm.swinv2-tiny-window8-256-ms-in1k",
+      "modelDescriptorVersion": "650d02aabf05e8adbd060a739ab39e39f53da639",
+      "timmModelName": "swinv2_tiny_window8_256.ms_in1k",
+      "source": {
+        "repoId": "timm/swinv2_tiny_window8_256.ms_in1k",
+        "revision": "650d02aabf05e8adbd060a739ab39e39f53da639",
+        "files": [
+          {"path": "model.safetensors", "digest": "sha256:c47f52b4556ff4436aa9502f5efbc93aac77fdab42d9d70dd845931757ff5d65"}
+        ]
+      },
+      "license": {"spdx": "MIT", "datasetTerms": "ImageNet-1k dataset terms apply to the pretrained weights."},
+      "input": {"height": 256, "width": 256},
+      "qualification": {"status": "BLOCKED", "reason": "Awaiting published timm 1.0.28 + torch 2.8/cu128 Blackwell execution packet and measured VRAM envelope.", "measuredEnvelope": null}
+    },
+    "swinv2-small-window8-256-ms-in1k": {
+      "modelDescriptorId": "org.timm.swinv2-small-window8-256-ms-in1k",
+      "modelDescriptorVersion": "0c9500fcde4c689e97ff51954debae59c158af0d",
+      "timmModelName": "swinv2_small_window8_256.ms_in1k",
+      "source": {
+        "repoId": "timm/swinv2_small_window8_256.ms_in1k",
+        "revision": "0c9500fcde4c689e97ff51954debae59c158af0d",
+        "files": [
+          {"path": "model.safetensors", "digest": "sha256:7e793c2f3576d20b5f746ac5dc6b7271745d612f9ce06ccabe382c36f39f1caa"}
+        ]
+      },
+      "license": {"spdx": "MIT", "datasetTerms": "ImageNet-1k dataset terms apply to the pretrained weights."},
+      "input": {"height": 256, "width": 256},
+      "qualification": {"status": "BLOCKED", "reason": "Awaiting published timm 1.0.28 + torch 2.8/cu128 Blackwell execution packet and measured VRAM envelope.", "measuredEnvelope": null}
+    }
+  }
+}

@@ -37,3 +37,17 @@ def test_handoff_exact_sample_set_and_digests(tmp_path):
     dp['assignments']=[]; write(tmp_path/'data-plan.json',dp); vm['dataPlanDigest']=djson(dp); write(tmp_path/'validated-dataset-manifest.json',vm)
     with pytest.raises(TypedRefusal) as e: load_validated_handoff(tmp_path)
     assert e.value.code=='HANDOFF_SAMPLE_SET_MUTATION'
+
+def test_handoff_label_map_is_fail_closed(tmp_path):
+    logical='sha256:'+'a'*64
+    dp={'schemaVersion':'1.0','logicalDatasetDigest':logical,'assignments':[{'sampleId':'train/cat/a.png','split':'train','reason':'directory-mapping'}],'seedPolicy':None}
+    lm={'schemaVersion':'1.0','sourceArtifactDigest':'sha256:'+'b'*64,'representationProfile':'core.dataset.vision.image-folder','logicalDatasetDigest':logical,'samples':[{'sampleId':'train/cat/a.png','assetIds':['train/cat/a.png'],'sourceLocator':'train/cat/a.png'}],'assets':[]}
+    def attempt(label_map):
+        ss={'schemaVersion':'1.0','taskProfile':'core.task.vision.image-classification','fields':[],'labelMap':label_map}
+        vm={'schemaVersion':'1.0','logicalDatasetDigest':logical,'datasetProfileDigest':None,'semanticSchemaDigest':djson(ss),'dataPlanDigest':djson(dp),'validationEvidenceDigests':['sha256:'+'c'*64],'validatorWorkerReleaseDigest':'sha256:'+'d'*64,'effectiveValidationConfigDigest':'sha256:'+'e'*64,'policySetDigest':None}
+        for n,v in [('data-plan.json',dp),('semantic-dataset-schema.json',ss),('logical-dataset-manifest.json',lm),('validated-dataset-manifest.json',vm)]: write(tmp_path/n,v)
+        return load_validated_handoff(tmp_path)
+    assert attempt({'0':'cat','1':'dog'}).class_names==['cat','dog']
+    for bad in ({},{'0':'cat','2':'dog'},{'x':'cat'},{'0':'cat','1':'cat'},{'0':''},{'0':None},{'0':['cat']},{'0':{'name':'cat'}},{'0':'cat','1':['dog']}):
+        with pytest.raises(TypedRefusal) as e: attempt(bad)
+        assert e.value.code=='HANDOFF_LABEL_MAP_INVALID'

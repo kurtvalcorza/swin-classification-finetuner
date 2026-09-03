@@ -34,5 +34,10 @@
   "limitations": [
     "One optimizer step per model and batch size; not a full-training stability claim.",
     "Batch 8 is a bounded representative probe, not a maximum-capacity claim."
-  ]
+  ],
+  "provenance": {
+    "recordedAfterExecution": "2026-08-29",
+    "dereferenceable": "qualification/image-ff4297dd/ holds qualify.py (the runner this image executes), pip-freeze.txt, dependency-report.json, and the baked catalog snapshot, extracted from qualificationImageDigest; the staged weights inside the image are verified by the catalog SHA-256 pins.",
+    "notExtant": "The raw evidence tree behind packetManifestDigest was not preserved; the digest remains a historical reference only."
+  }
 }

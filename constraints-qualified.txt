@@ -1,0 +1,38 @@
+# Qualified runtime constraint set for the finetuner worker image.
+#
+# Derived from qualification/image-ff4297dd/pip-freeze.txt, the pip state
+# recorded inside qualification image sha256:ff4297dd..., which is the runtime
+# the Blackwell packets qualified.
+#
+# Why this file exists: timm==1.0.28 declares `huggingface_hub` and
+# `safetensors` with no version bounds, and torchvision pulls `pillow`
+# unbounded. Installing timm alone therefore resolves whatever is newest on
+# the build date, so two builds of the same Dockerfile can ship different
+# decode and serialization runtimes without any requalification. trainer.py
+# imports PIL and safetensors directly, so that drift is semantic, not
+# cosmetic -- Pillow in particular owns the EXIF orientation behaviour the
+# training decode path was aligned to.
+#
+# Deliberately absent:
+#   torch, torchaudio, torchvision  -- supplied by the digest-pinned base
+#     image; their +cu128 local versions are not resolvable from PyPI, so
+#     constraining them here would break the build rather than pin it.
+#   numpy and other conda-supplied packages -- recorded in the freeze only as
+#     file:// build artifacts, which carry no expressible version. They are
+#     pinned by the base image digest.
+#
+# Regenerate whenever the qualification image digest changes.
+
+timm==1.0.28
+huggingface_hub==1.29.0
+safetensors==0.8.0
+pillow==12.3.0
+
+# huggingface_hub 1.29.0 transitive closure (PyPI-resolvable entries only)
+anyio==4.14.2
+click==8.5.0
+fsspec==2025.7.0
+h11==0.16.0
+hf-xet==1.6.0
+httpcore==1.0.9
+httpx==0.28.1

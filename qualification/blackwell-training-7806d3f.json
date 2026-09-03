@@ -45,5 +45,11 @@
   "limitations": [
     "This is a bounded Tiny end-to-end fixture smoke, not a production-scale convergence or throughput benchmark.",
     "Tiny and Small runtime qualification and VRAM envelopes remain recorded separately in blackwell-timm-1.0.28.json."
-  ]
+  ],
+  "provenance": {
+    "recordedAfterExecution": "2026-08-29",
+    "dereferenceable": "qualification/image-ff4297dd/ holds the qualification image contents this run executed in; the runtime environment is fully pinned by qualificationImageDigest.",
+    "notExtant": "The raw 39-file evidence tree behind verification.evidenceDigest was not preserved; its digest remains a historical reference only.",
+    "supersededBy": "qualification/blackwell-training-smoke-cf3f429.json + qualification/harness/ — the source-bound, rerunnable training-smoke evidence for the current code."
+  }
 }
