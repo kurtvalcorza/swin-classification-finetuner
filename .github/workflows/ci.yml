@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -m pip install --upgrade pip
+
+      # Installed with --no-deps deliberately. The declared dependency set
+      # resolves torch via timm, which is multiple GB and would dominate every
+      # run; the suite does not need it, because trainer.py imports torch,
+      # timm and safetensors lazily inside functions rather than at module
+      # scope. --no-deps still verifies that pyproject is well-formed and the
+      # package imports as installed, which a bare PYTHONPATH run would not.
+      - run: python -m pip install --no-deps -e .
+
+      # Pillow is a real test dependency: the EXIF orientation test decodes an
+      # actual image, and without Pillow it errors rather than skipping.
+      # Pinned to the version recorded in the Blackwell qualification freeze so
+      # CI exercises the same decode behaviour the training path qualified on.
+      - run: python -m pip install pytest "Pillow==12.3.0"
+
+      - run: python -m compileall -q src tests
+      - run: python -m pytest
