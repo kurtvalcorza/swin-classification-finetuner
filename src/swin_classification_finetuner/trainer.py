@@ -44,6 +44,45 @@ def load_visual_image(path: Path):
         return ImageOps.exif_transpose(image).convert("RGB")
 
 
+def summarize_image_forms(
+    paths: "list[Path] | tuple[Path, ...]", *, input_height: int, input_width: int
+) -> dict[str, Any]:
+    """Account for what the RGB conversion and the fixed-size resize will do to these images.
+
+    Reads image headers only (no pixel decode). ``load_visual_image`` converts every
+    mode to RGB and the transform resizes to the training resolution without
+    preserving aspect ratio; neither is a refusal, so both must be observable
+    (DIMER Pipeline Spec DAT9/DAT10, section 21.9). The result is written to the
+    run manifest and non-RGB / undersized counts are warned about on stdout.
+    """
+    from PIL import Image
+
+    modes: dict[str, int] = {}
+    widths: list[int] = []
+    heights: list[int] = []
+    for path in paths:
+        with Image.open(path) as image:
+            modes[image.mode] = modes.get(image.mode, 0) + 1
+            widths.append(int(image.width))
+            heights.append(int(image.height))
+    converted = sum(count for mode, count in modes.items() if mode != "RGB")
+    undersized = sum(
+        1 for w, h in zip(widths, heights) if w < input_width or h < input_height
+    )
+    non_square = sum(1 for w, h in zip(widths, heights) if w != h)
+    return {
+        "images": len(widths),
+        "modes": dict(sorted(modes.items())),
+        "convertedToRgb": converted,
+        "conversion": "all non-RGB modes converted to RGB by load_visual_image (alpha dropped, grayscale replicated, palette expanded)",
+        "width": {"min": min(widths), "max": max(widths)} if widths else None,
+        "height": {"min": min(heights), "max": max(heights)} if heights else None,
+        "belowInputSize": undersized,
+        "nonSquare": non_square,
+        "resize": f"every image resized to {input_height}x{input_width} without preserving aspect ratio",
+    }
+
+
 @dataclass(frozen=True)
 class TrainingBinding:
     job_id: str
@@ -582,6 +621,20 @@ def train_dataset(
 
     handoff = load_validated_handoff(Path(handoff_root))
     records = resolve_sample_records(Path(dataset_root), handoff)
+    image_forms = summarize_image_forms(
+        [record.path for record in records],
+        input_height=256,
+        input_width=256,
+    )
+    if image_forms["convertedToRgb"]:
+        print(
+            f"WARNING: {image_forms['convertedToRgb']} of {image_forms['images']} images are not RGB "
+            f"({image_forms['modes']}); they are converted to RGB before the network sees them."
+        )
+    if image_forms["belowInputSize"]:
+        print(
+            f"WARNING: {image_forms['belowInputSize']} of {image_forms['images']} images are smaller than 256x256 and will be upsampled."
+        )
     catalog = load_catalog(Path(catalog_path))
     resolved_model = resolve_base_model(
         catalog, config.model_key, Path(weights_root), require_qualified=True
@@ -878,6 +931,7 @@ def train_dataset(
             "artifactGeneration": generation.name,
             "artifactBundleDigest": persisted_manifest["bundleDigest"],
             "splitCounts": split_counts,
+            "inputImageForms": image_forms,
             "classNames": class_names,
             "history": history,
             "freshReloadSmokePrediction": smoke_prediction,
