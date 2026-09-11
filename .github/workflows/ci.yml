@@ -35,7 +35,11 @@ jobs:
       # actual image, and without Pillow it errors rather than skipping.
       # Pinned to the version recorded in the Blackwell qualification freeze so
       # CI exercises the same decode behaviour the training path qualified on.
-      - run: python -m pip install pytest "Pillow==12.3.0"
+      # huggingface_hub is imported at module scope by scripts/stage_weights.py,
+      # which tests/test_stage_weights.py imports; without it those three tests
+      # ERROR at collection (main has been red since #5 landed after #7). Resolved
+      # under constraints-qualified.txt, the same pin the worker image uses.
+      - run: python -m pip install -c constraints-qualified.txt pytest "Pillow==12.3.0" huggingface_hub
 
       - run: python -m compileall -q src tests
       - run: python -m pytest
