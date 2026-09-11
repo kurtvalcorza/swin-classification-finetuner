@@ -31,7 +31,8 @@ Run `swin-classification-train --help` for the worker-facing arguments. Runtime 
 
 Every published bundle now carries a third member, `model_manifest.json`
 (role `org.valcorza.timm.model-manifest`), derived from `model-config.json` in the
-schema of [dimer-inference-service-timm](https://github.com/kurtvalcorza/dimer-inference-service-timm):
+schema of `dimer-inference-service-timm`, DIMER's timm serving worker (that repository is
+private; the schema is vendored verbatim under `tests/fixtures/` and is the public reference):
 timm identifier, `num_classes`, ordered `class_names`, checkpoint filename, EMA choice,
 and the exact evaluation preprocessing (256×256 plain resize expressed as
 `crop_pct: 1.0, crop_mode: "squash"`, bicubic, ImageNet normalization). A DIMER
