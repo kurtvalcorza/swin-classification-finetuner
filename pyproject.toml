@@ -6,6 +6,7 @@ name="swin-classification-finetuner"
 version="0.1.0"
 description="NATIVE ml-worker SwinV2 image-classification finetuner"
 requires-python=">=3.11"
+license={text="MIT"}
 # trainer.py imports PIL and safetensors directly, so they are declared here
 # rather than inherited implicitly through timm/torchvision. Pinned to the
 # versions recorded in the qualification freeze; see constraints-qualified.txt.
