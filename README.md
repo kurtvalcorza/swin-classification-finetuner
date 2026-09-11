@@ -38,3 +38,15 @@ and the exact evaluation preprocessing (256×256 plain resize expressed as
 model version made from a bundle is therefore servable by that worker as uploaded,
 with no hand-written manifest. The contract is vendored under `tests/fixtures/` and
 the emitted document is validated against it in the test suite.
+
+## Input image forms are accounted for, not hidden
+
+The trainer decodes every image in visual orientation and converts it to RGB
+(`load_visual_image`), then resizes it to 256×256 without preserving aspect ratio.
+Neither step is a refusal, so both are made observable (DIMER Pipeline Spec
+DAT9/DAT10, §21.9): before training, `summarize_image_forms` reads every image
+header and the run manifest records `observed.inputImageForms` — per-mode counts,
+how many images were converted to RGB, width/height ranges, how many are smaller
+than the input size and how many are non-square. A `WARNING:` line is printed when
+any image is converted or upsampled. Channel counts are not validated as a hard
+refusal; an operator whose channel structure carries meaning must read this record.

@@ -253,3 +253,33 @@ def test_artifact_verification_rejects_member_path_traversal(tmp_path: Path) -> 
 
     with pytest.raises(RuntimeError, match="contained filename"):
         verify_artifact_bundle(generation)
+
+
+def test_image_forms_are_observable_not_silent(tmp_path: Path) -> None:
+    """DAT9/DAT10 + section 21.9: RGB conversion and the fixed resize are accounted for, not hidden."""
+    from PIL import Image
+
+    from swin_classification_finetuner.trainer import summarize_image_forms
+
+    paths = []
+    for name, mode, size in (
+        ("rgb.png", "RGB", (256, 256)),
+        ("gray.png", "L", (300, 200)),
+        ("alpha.png", "RGBA", (64, 64)),
+        ("palette.png", "P", (256, 256)),
+    ):
+        path = tmp_path / name
+        Image.new(mode, size).save(path)
+        paths.append(path)
+
+    forms = summarize_image_forms(paths, input_height=256, input_width=256)
+
+    assert forms["images"] == 4
+    assert forms["modes"] == {"L": 1, "P": 1, "RGB": 1, "RGBA": 1}
+    assert forms["convertedToRgb"] == 3
+    assert forms["belowInputSize"] == 2  # 300x200 (height) and 64x64
+    assert forms["nonSquare"] == 1
+    assert forms["width"] == {"min": 64, "max": 300} and forms["height"] == {"min": 64, "max": 256}
+    assert "without preserving aspect ratio" in forms["resize"]
+    # every converted image still decodes to RGB through the production decoder
+    assert all(load_visual_image(p).mode == "RGB" for p in paths)
